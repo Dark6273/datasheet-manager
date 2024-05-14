@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %} Timer {% endblock title %} 
+
+{% block body %}
+<div class="row mb-3 text-center" >
+    <div class="col-md-5 themed-grid-col p-5" >
+      <div class="border-bottom pb-4">
+        <div id="timer" class="fs-1">00:00:00</div>
+        <button id="startButton" class="btn btn-outline-success" >Start</button>
+        {% comment %} <button id="stopButton" disabled>Stop</button> {% endcomment %}
+        <br>
+
+        <form id="timerForm" method="post" style="" class="pt-5" >
+        {% csrf_token %} {{ form.as_p }}
+        <button type="submit" class="btn btn-success"> Save Stop Time</button>
+        </form>
+      </div>
+      <div>
+        
+      </div>
+    </div>
+
+    <div class="col-md-7 themed-grid-col p-5" >
+    <h1 class="pb-5" >Record History</h1>
+    <table class="table table-striped table-hover" >
+        <tr>
+        <th>project</th>
+        <th>tag</th>
+        <th>task</th>
+        <th>time</th>
+        </tr>
+        {% for record in records %}
+        <tr>
+        <td>{{ record.project }}</td>
+        <td>{{ record.project.tag }}</td>
+        <td>{{ record.task }}</td>
+        <td>{{ record.time }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    </div>
+</div>
+{% endblock body %}
+
+{% block script %}
+<script>
+  var timer;
+  var startTime = 0;
+
+  function startTimer() {
+    if (startTime == 0) startTime = Date.now();
+
+    timer = setInterval(updateTimer, 1000);
+    document.getElementById("startButton").disabled = true;
+    document.getElementById("stopButton").disabled = false;
+  }
+
+  function stopTimer() {
+    clearInterval(timer);
+    document.getElementById("stopTimeInput").value =
+      document.getElementById("timer").innerHTML;
+    document.getElementById("startButton").disabled = false;
+    document.getElementById("stopButton").disabled = true;
+  }
+
+  function updateTimer() {
+    var currentTime = Date.now();
+    var elapsedTime = new Date(currentTime - startTime);
+    var formattedTime = elapsedTime.toISOString().substr(11, 8);
+
+    document.getElementById("timer").innerHTML = formattedTime;
+  }
+
+  document
+    .getElementById("timerForm")
+    .addEventListener("submit", function (event) {
+      clearInterval(timer);
+      var stopTime = Date.now();
+      document.getElementById("id_time").value = stopTime - startTime;
+    });
+
+  document.getElementById("startButton").addEventListener("click", startTimer);
+  document.getElementById("stopButton").addEventListener("click", stopTimer);
+</script>
+{% endblock script %}
