@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load jalali_filters %}
 
 {% block title %} Timer {% endblock title %} 
 
@@ -25,10 +26,11 @@
     <h1 class="pb-5" >Record History</h1>
     <table class="table table-striped table-hover" >
         <tr>
-        <th>project</th>
-        <th>tag</th>
-        <th>task</th>
-        <th>time</th>
+        <th>Project</th>
+        <th>Tag</th>
+        <th>Task</th>
+        <th>Time</th>
+        <th>Date</th>
         </tr>
         {% for record in records %}
         <tr>
@@ -36,6 +38,7 @@
         <td>{{ record.project.tag }}</td>
         <td>{{ record.task }}</td>
         <td>{{ record.time }}</td>
+        <td>{{ record.created_at|to_jalali }}</td>
         </tr>
         {% endfor %}
     </table>
@@ -45,6 +48,12 @@
 
 {% block script %}
 <script>
+  //  addEventListener("beforeunload", (e) => alert("closing"))
+  //window.onbeforeload = function() {
+    //alert("ok")
+  //} 
+
+
   var timer;
   var startTime = 0;
 
@@ -82,5 +91,11 @@
 
   document.getElementById("startButton").addEventListener("click", startTimer);
   document.getElementById("stopButton").addEventListener("click", stopTimer);
+</script>
+<script type="text/javascript">
+  window.addEventListener('beforeunload', function (e) {
+    e.preventDefault();
+    e.returnValue = '';
+  });
 </script>
 {% endblock script %}
