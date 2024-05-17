@@ -23,7 +23,6 @@ class TimerRecord(models.Model):
     task = models.TextField(null=False)
     time = models.DurationField(null=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    # created_at = models.DateTimeField(auto_now_add=True)
     created_at = jmodels.jDateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:

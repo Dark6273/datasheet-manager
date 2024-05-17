@@ -1,59 +1,97 @@
-{% extends "base.html" %}
-{% load jalali_filters %}
+{% extends "base.html" %} 
+{% load jalali_filters %} 
+{% load static %}
+
 
 {% block title %} Timer {% endblock title %} 
 
 {% block body %}
-<div class="row mb-3 text-center" >
-    <div class="col-md-5 themed-grid-col p-5" >
-      <div class="border-bottom pb-4">
-        <div id="timer" class="fs-1">00:00:00</div>
-        <button id="startButton" class="btn btn-outline-success" >Start</button>
-        {% comment %} <button id="stopButton" disabled>Stop</button> {% endcomment %}
-        <br>
+<div class="row mb-3 text-center">
+  <div class="col-md-5 themed-grid-col p-5">
+    <div class="border-bottom pb-4">
+      <div id="timer" class="fs-1">00:00:00</div>
+      <button id="startButton" class="btn btn-outline-success">Start</button>
+      <br />
 
-        <form id="timerForm" method="post" style="" class="pt-5" >
+      <form id="timerForm" method="post" style="" class="pt-5">
         {% csrf_token %} {{ form.as_p }}
-        <button type="submit" class="btn btn-success"> Save Stop Time</button>
-        </form>
-      </div>
-      <div>
-        
-      </div>
+        <button type="submit" class="btn btn-success">Save Stop Time</button>
+      </form>
     </div>
 
-    <div class="col-md-7 themed-grid-col p-5" >
-    <h1 class="pb-5" >Record History</h1>
-    <table class="table table-striped table-hover" >
-        <tr>
+    <div class="pt-5">
+        <h4>Export Timesheet</h4>
+        <form method="post" action="{% url 'export-view' %}">
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="{{ export_form.start_date.id_for_label }}"></label>
+                    {{ export_form.start_date }}
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="{{ export_form.end_date.id_for_label }}"></label>
+                    {{ export_form.end_date }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="{{ export_form.project_name.id_for_label }}"></label>
+                    {{ export_form.project_name }}
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="{{ export_form.project_tag.id_for_label }}"></label>
+                    {{ export_form.project_tag }}
+                </div>
+            </div>
+            <br>
+
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="{{ export_form.export_format.id_for_label }}"></label>
+                    {{ export_form.export_format }}
+                </div>
+                <div class="form-group col-md-6">
+                    <input type="submit" class="form-control btn btn-primary" value="export">
+                </div>
+            </div>
+        </form>
+    </div>
+  </div>
+
+  <div class="col-md-7 themed-grid-col p-5">
+    <h1 class="pb-5">Record History</h1>
+    <table class="table table-striped table-hover">
+      <tr>
         <th>Project</th>
         <th>Tag</th>
         <th>Task</th>
         <th>Time</th>
         <th>Date</th>
-        </tr>
-        {% for record in records %}
-        <tr>
+      </tr>
+      {% for record in records %}
+      <tr>
         <td>{{ record.project }}</td>
         <td>{{ record.project.tag }}</td>
         <td>{{ record.task }}</td>
         <td>{{ record.time }}</td>
         <td>{{ record.created_at|to_jalali }}</td>
-        </tr>
-        {% endfor %}
+      </tr>
+      {% endfor %}
     </table>
-    </div>
+  </div>
 </div>
-{% endblock body %}
+<!-- By default, Datepicker using jQuery, you need to set your script after loading jQuery! -->
+	<!-- loading directly -->
+    <link rel="stylesheet" href="{% static 'admin/jquery.ui.datepicker.jalali/themes/base/jquery-ui.min.css' %}">
+    <script src="{% static 'admin/js/django_jalali.min.js' %}"></script>
+<!-- OR -->
+<!-- loading by form (if used AdminJalaliDateWidget) -->
+    {{ export_form.media }}
+
+{% endblock body %} 
 
 {% block script %}
 <script>
-  //  addEventListener("beforeunload", (e) => alert("closing"))
-  //window.onbeforeload = function() {
-    //alert("ok")
-  //} 
-
-
   var timer;
   var startTime = 0;
 
@@ -91,11 +129,5 @@
 
   document.getElementById("startButton").addEventListener("click", startTimer);
   document.getElementById("stopButton").addEventListener("click", stopTimer);
-</script>
-<script type="text/javascript">
-  window.addEventListener('beforeunload', function (e) {
-    e.preventDefault();
-    e.returnValue = '';
-  });
 </script>
 {% endblock script %}
