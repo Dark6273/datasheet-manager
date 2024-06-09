@@ -26,7 +26,7 @@ def extract_timesheet(start_time: jDateField, end_time: jDateField, project: Pro
     if project:
         query &= Q(project=project)
 
-    records = TimerRecord.objects.filter(query).values('task', 'time', 'project', 'created_at')
+    records = TimerRecord.objects.filter(query).values('task', 'time', 'project__name', 'created_at')
 
     if len(records) <= 0:
         return
@@ -53,7 +53,7 @@ def timer_view(request):
         
     form = TimerForm()
     export_form = ExportForm() 
-    records = TimerRecord.objects.all().order_by('-created_at')[:100]
+    records = TimerRecord.objects.all().order_by('-created_at')[:25]
     return render(request, 'timer.html', {'form': form, 'export_form': export_form, 'records': records})
 
 
