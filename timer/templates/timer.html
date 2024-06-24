@@ -11,6 +11,7 @@
     <div class="border-bottom pb-4">
       <div id="timer" class="fs-1">00:00:00</div>
       <button id="startButton" class="btn btn-outline-success">Start</button>
+      <button id="pause" class="btn btn-outline-danger" onclick="javascript:onPause()" disabled>pause</button>
       <br />
 
       <form id="timerForm" method="post" style="" class="pt-5">
@@ -91,43 +92,5 @@
 {% endblock body %} 
 
 {% block script %}
-<script>
-  var timer;
-  var startTime = 0;
-
-  function startTimer() {
-    if (startTime == 0) startTime = Date.now();
-
-    timer = setInterval(updateTimer, 1000);
-    document.getElementById("startButton").disabled = true;
-    document.getElementById("stopButton").disabled = false;
-  }
-
-  function stopTimer() {
-    clearInterval(timer);
-    document.getElementById("stopTimeInput").value =
-      document.getElementById("timer").innerHTML;
-    document.getElementById("startButton").disabled = false;
-    document.getElementById("stopButton").disabled = true;
-  }
-
-  function updateTimer() {
-    var currentTime = Date.now();
-    var elapsedTime = new Date(currentTime - startTime);
-    var formattedTime = elapsedTime.toISOString().substr(11, 8);
-
-    document.getElementById("timer").innerHTML = formattedTime;
-  }
-
-  document
-    .getElementById("timerForm")
-    .addEventListener("submit", function (event) {
-      clearInterval(timer);
-      var stopTime = Date.now();
-      document.getElementById("id_time").value = stopTime - startTime;
-    });
-
-  document.getElementById("startButton").addEventListener("click", startTimer);
-  document.getElementById("stopButton").addEventListener("click", stopTimer);
-</script>
+<script src="{% static 'js/script.js' %}"></script>
 {% endblock script %}
