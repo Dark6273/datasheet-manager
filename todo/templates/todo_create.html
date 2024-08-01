@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Todo</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .form-group label {
+            font-weight: bold;
+        }
+        .btn-submit {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-submit:hover {
+            background-color: #218838;
+        }
+        .btn-back {
+            background-color: #6c757d;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-back:hover {
+            background-color: #5a6268;
+        }
+        .alert {
+            display: none;
+            margin-top: 20px;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Create Todo</h1>
+        <form id="todoForm" method="post"
+              action="{% if project %}{% url 'todo_create_for_project' project.pk %}{% else %}{% url 'todo_create' %}{% endif %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" id="title" name="title" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" class="form-control" rows="4" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="due_date">Due Date</label>
+                <input type="datetime-local" id="due_date" name="due_date" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="completed">Completed</label>
+                <input type="checkbox" id="completed" name="completed">
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn-submit">Save</button>
+                <button type="button" class="btn-back" onclick="window.location.href='{% url 'todo_list' %}'">Back to Todo List</button>
+            </div>
+        </form>
+        <div id="message" class="alert alert-success">
+            Todo created successfully!
+        </div>
+        <div id="error-message" class="alert alert-danger"></div>
+    </div>
+
+    <script>
+        document.getElementById('todoForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const form = event.target;
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('message').style.display = 'block';
+                    setTimeout(() => {
+                        window.location.href = "{% url 'todo_list' %}";
+                    }, 1500);
+                } else {
+                    document.getElementById('error-message').innerHTML = 'Error: ' + JSON.stringify(data.errors);
+                    document.getElementById('error-message').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
