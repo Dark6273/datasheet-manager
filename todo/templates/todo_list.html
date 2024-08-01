@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f4f7f6;
+        }
+        .assign-form {
+            display: flex;
+            align-items: center;
+        }
+        .assign-form select {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Todo List</h1>
+        <a href="{% url 'todo_create' %}" class="btn btn-primary mb-3">Add New Todo</a>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Due Date</th>
+                    <th>Completed</th>
+                    <th>Project</th>
+                    <th>Assign Project</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for to_do in todo %}
+                <tr>
+                    <td>{{ to_do.title }}</td>
+                    <td>{{ to_do.description }}</td>
+                    <td>{{ to_do.due_date }}</td>
+                    <td>{% if to_do.completed %}Yes{% else %}No{% endif %}</td>
+                    <td>{% if to_do.project %}{{ to_do.project.name }}{% else %}None{% endif %}</td>
+                    <td>
+                        <form class="assign-form" method="post" action="{% url 'todo_assign_project' to_do.id %}">
+                            {% csrf_token %}
+                            <select name="project_id" class="form-control">
+                                <option value="">Select Project</option>
+                                {% for project in projects %}
+                                <option value="{{ project.id }}" {% if to_do.project == project %}selected{% endif %}>{{ project.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn btn-secondary mt-2">Assign</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">No todos available</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
