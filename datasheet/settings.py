@@ -13,6 +13,11 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import os
 from pathlib import Path
 
+from django.urls import reverse_lazy
+from django.templatetags.static import static
+from django.utils.translation import gettext_lazy as _
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -31,17 +36,27 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-INSTALLED_APPS = [
+DJANGO_APPS = [
+    "unfold",  # before django.contrib.admin
+    "unfold.contrib.filters",  # optional, if special filters are needed
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+]
+
+THIRD_PARTY_APPS = [
     'django_jalali',
     'jalali_date',
-    'timer'
 ]
+
+LOCAL_APPS = [
+    'timer',
+]
+
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -142,6 +157,125 @@ JALALI_DATE_DEFAULTS = {
                 'admin/jquery.ui.datepicker.jalali/themes/base/jquery-ui.min.css',
             ]
         }
+    },
+}
+
+# Django Unfold settings | website - https://unfoldadmin.com/
+UNFOLD = {
+    "SITE_TITLE": "Timesheet Admin",
+    "SITE_HEADER": "Timesheet Admin panel",
+    "SITE_URL": "/",
+    # "SITE_ICON": lambda request: static("icon.svg"),  # both modes, optimise for 32px height
+    # "SITE_ICON": {
+    #     "light": lambda request: static("icon-light.svg"),  # light mode
+    #     "dark": lambda request: static("icon-dark.svg"),  # dark mode
+    # },
+    # # "SITE_LOGO": lambda request: static("logo.svg"),  # both modes, optimise for 32px height
+    # "SITE_LOGO": {
+    #     "light": lambda request: static("logo-light.svg"),  # light mode
+    #     "dark": lambda request: static("logo-dark.svg"),  # dark mode
+    # },
+    "SITE_SYMBOL": "more_time",  # symbol from icon set
+    "SITE_FAVICONS": [
+        {
+            "rel": "icon",
+            "sizes": "32x32",
+            "type": "image/svg+xml",
+            "href": lambda request: static("img/favicon.svg"),
+        },
+    ],
+    "SHOW_HISTORY": True, # show/hide "History" button, default: True
+    "SHOW_VIEW_ON_SITE": True, # show/hide "View on site" button, default: True
+    "LOGIN": {
+        # "image": lambda request: static("admin/login.png"),
+        # "redirect_after": lambda request: reverse_lazy("admin:APP_MODEL_changelist"),
+    },
+    "BORDER_RADIUS": "6px",
+    "COLORS": {
+        "base": {
+            "50": "249 250 251",
+            "100": "243 244 246",
+            "200": "229 231 235",
+            "300": "209 213 219",
+            "400": "156 163 175",
+            "500": "107 114 128",
+            "600": "75 85 99",
+            "700": "55 65 81",
+            "800": "31 41 55",
+            "900": "17 24 39",
+            "950": "3 7 18",
+        },
+        "primary": {
+            "50": "240 253 250",
+            "100": "204 251 241",
+            "200": "153 246 228",
+            "300": "94 234 212",
+            "400": "45 212 191",
+            "500": "20 184 166",
+            "600": "13 148 136",
+            "700": "15 118 110",
+            "800": "17 94 89",
+            "900": "19 78 74",
+            "950": "4 47 46",
+        },
+        "font": {
+            "subtle-light": "var(--color-base-500)",  # text-base-500
+            "subtle-dark": "var(--color-base-400)",  # text-base-400
+            "default-light": "var(--color-base-600)",  # text-base-600
+            "default-dark": "var(--color-base-300)",  # text-base-300
+            "important-light": "var(--color-base-900)",  # text-base-900
+            "important-dark": "var(--color-base-100)",  # text-base-100
+        },
+    },
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": True,
+        "navigation": [
+            {
+                "title": _("Navigation"),
+                "separator": True,  # Top border
+                "collapsible": False,  # Collapsible group of links
+                "items": [
+                    {
+                        "title": _("Dashboard"),
+                        "icon": "dashboard",  # Supported icon set: https://fonts.google.com/icons
+                        "link": reverse_lazy("admin:index"),
+                        "permission": lambda request: request.user.is_superuser,
+                    },
+                    {
+                        "title": _("Users"),
+                        "icon": "people",
+                        "link": reverse_lazy("admin:auth_user_changelist"),
+                        "permission": lambda request: request.user.is_superuser,
+                    },
+                ],
+            },
+            {
+                "title": _("Timesheet"),
+                "separator": True,
+                "collapsible": False,
+                "items": [
+                    {
+                        "title": _("Projects"),
+                        "icon": "work",
+                        "link": reverse_lazy("admin:timer_project_changelist"),
+                        "permission": lambda request: request.user.is_superuser,
+                    },
+                    {
+                        "title": _("Tag"),
+                        "icon": "sell",
+                        "link": reverse_lazy("admin:timer_tag_changelist"),
+                        "permission": lambda request: request.user.is_superuser,
+                    },
+                    {
+                        "title": _("Timesheet Records"),
+                        "icon": "timelapse",
+                        "link": reverse_lazy("admin:timer_timerrecord_changelist"),
+                        "permission": lambda request: request.user.is_superuser,
+                    },
+                ]
+            }
+        ],
     },
 }
 

@@ -2,6 +2,7 @@ asgiref==3.8.1
 Django==5.0.6
 django-jalali==6.2.1
 django-jalali-date==1.1.0
+django-unfold==0.55.2
 et-xmlfile==1.1.0
 jalali_core==1.0.0
 jdatetime==5.0.0
@@ -10,6 +11,7 @@ openpyxl==3.1.2
 pandas==2.2.2
 python-dateutil==2.9.0.post0
 pytz==2024.1
+setuptools==75.3.0
 six==1.16.0
 sqlparse==0.5.0
 typing_extensions==4.11.0
