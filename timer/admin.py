@@ -116,10 +116,17 @@ class TimerRecordAdmin(ModelAdmin):
     tag_name.short_description = 'Label'
     
     def formatted_time(self, obj):
-        hours, remainder = divmod(obj.time.total_seconds(), 3600)
-        minutes, seconds = divmod(remainder, 60)
-        return format_html('<span class="badge badge-secondary">{:02}:{:02}:{:02}</span>', 
-                           int(hours), int(minutes), int(seconds))
+        total_seconds = int(obj.time.total_seconds())
+        hours = total_seconds // 3600
+        remainder = total_seconds % 3600
+        minutes = remainder // 60 
+        seconds = remainder % 60 
+        hours = int(hours)
+        minutes = int(minutes)
+        seconds = int(seconds)
+        string = f'<span class="badge badge-secondary">{hours:02}:{minutes:02}:{seconds:02}</span>'
+        return format_html(string)
+    
     formatted_time.short_description = 'Time'
 
     def formatted_created_at(self, obj):
