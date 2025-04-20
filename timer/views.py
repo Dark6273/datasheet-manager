@@ -1,11 +1,14 @@
 import pandas as pd
 
-from datetime import timedelta
 from django.db.models import Q
+from django.db.models import Sum
+from django.utils import timezone
 from django.shortcuts import render
-from django.http import HttpResponse, Http404
-from django.utils.timezone import make_naive
 from django_jalali.forms import jDateField
+from django.utils.timezone import make_naive
+from django.http import HttpResponse, Http404
+from jdatetime import datetime as jdatetime, timedelta
+from django.contrib.admin.views.decorators import staff_member_required
 
 from .forms import TimerForm, ExportForm
 from .models import TimerRecord, Project, Tag
@@ -89,3 +92,32 @@ def export_to_excel(request):
 
     return response
 
+
+@staff_member_required
+def performance_view(request):
+    today = jdatetime.fromgregorian(datetime=timezone.now())
+    month_start = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+    today_gregorian = today.togregorian()
+    month_start_gregorian = month_start.togregorian()
+
+    daily_records = TimerRecord.objects.filter(
+        created_at__date=today_gregorian.date()
+    )
+    daily_total_time = daily_records.aggregate(total=Sum('time'))['total'] or timedelta()
+    daily_project_times = daily_records.values('project__name').annotate(total=Sum('time'))
+
+    monthly_records = TimerRecord.objects.filter(
+        created_at__gte=month_start_gregorian,
+        created_at__lte=today_gregorian
+    )
+    monthly_total_time = monthly_records.aggregate(total=Sum('time'))['total'] or timedelta()
+    monthly_project_times = monthly_records.values('project__name').annotate(total=Sum('time'))
+
+    context = {
+        'daily_total_time': format_timedelta(daily_total_time),
+        'daily_project_times': [(item['project__name'], item['total'] or timedelta()) for item in daily_project_times],
+        'monthly_total_time': format_timedelta(monthly_total_time),
+        'monthly_project_times': [(item['project__name'], item['total'] or timedelta()) for item in monthly_project_times],
+    }
+    return render(request, 'performance.html', context)

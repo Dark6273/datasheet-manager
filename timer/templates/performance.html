@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Performance Report{% endblock title %}
+{% block header %}
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+    .chart-container {
+        width: 200px;
+        height: 200px;
+        position: relative;
+        display: block;
+    }
+    canvas {
+        width: 200px !important;
+        height: 200px !important;
+        display: block;
+    }
+</style>
+{% endblock header %}
+
+{% block body %}
+<body class="bg-gray-100 font-sans">
+    <div class="container mx-auto p-6 min-h-0">
+        <h1 class="text-3xl font-bold text-center mb-8">Performance Report</h1>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Daily Box -->
+            <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center">
+                <h2 class="text-xl font-semibold mb-4">Today's Performance</h2>
+                <div class="chart-container">
+                    <canvas id="dailyChart"></canvas>
+                </div>
+                <p class="mt-4 text-lg">Total Time: {{ daily_total_time }}</p>
+                <ul class="mt-2 text-sm">
+                    {% for project, time in daily_project_times %}
+                        <li>{{ project }}: {{ time }}</li>
+                    {% empty %}
+                        <li>No data available</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <!-- Monthly Box -->
+            <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center">
+                <h2 class="text-xl font-semibold mb-4">This Month's Performance</h2>
+                <div class="chart-container">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+                <p class="mt-4 text-lg">Total Time: {{ monthly_total_time }}</p>
+                <ul class="mt-2 text-sm">
+                    {% for project, time in monthly_project_times %}
+                        <li>{{ project }}: {{ time }}</li>
+                    {% empty %}
+                        <li>No data available</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock body %}
+{% block script %}
+    <script>
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Chart.js loaded:', typeof Chart !== 'undefined');
+            console.log('Daily Data:', [{% for project, time in daily_project_times %}{project: '{{ project }}', seconds: {{ time.total_seconds|default:0|floatformat:0 }}},{% endfor %}]);
+            console.log('Monthly Data:', [{% for project, time in monthly_project_times %}{project: '{{ project }}', seconds: {{ time.total_seconds|default:0|floatformat:0 }}},{% endfor %}]);
+
+            // Format time to HH:MM:SS
+            function formatTime(seconds) {
+                const hrs = Math.floor(seconds / 3600);
+                const mins = Math.floor((seconds % 3600) / 60);
+                const secs = seconds % 60;
+                return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            // Daily Chart
+            const dailyData = {
+                labels: [{% for project, _ in daily_project_times %}'{{ project }}',{% endfor %}],
+                datasets: [{
+                    data: [{% for _, time in daily_project_times %}{{ time.total_seconds|default:0|floatformat:0 }},{% endfor %}],
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
+                }]
+            };
+            console.log('Daily Chart Data:', dailyData);
+            const dailyCtx = document.getElementById('dailyChart').getContext('2d');
+            new Chart(dailyCtx, {
+                type: 'doughnut',
+                data: dailyData.labels.length && dailyData.datasets[0].data.some(d => d > 0) ? dailyData : {
+                    labels: ['No Data'],
+                    datasets: [{ data: [1], backgroundColor: ['#CCCCCC'] }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let seconds = context.parsed || 0;
+                                    return `${context.label}: ${formatTime(seconds)}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Monthly Chart
+            const monthlyData = {
+                labels: [{% for project, _ in monthly_project_times %}'{{ project }}',{% endfor %}],
+                datasets: [{
+                    data: [{% for _, time in monthly_project_times %}{{ time.total_seconds|default:0|floatformat:0 }},{% endfor %}],
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
+                }]
+            };
+            console.log('Monthly Chart Data:', monthlyData);
+            const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+            new Chart(monthlyCtx, {
+                type: 'doughnut',
+                data: monthlyData.labels.length && monthlyData.datasets[0].data.some(d => d > 0) ? monthlyData : {
+                    labels: ['No Data'],
+                    datasets: [{ data: [1], backgroundColor: ['#CCCCCC'] }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let seconds = context.parsed || 0;
+                                    return `${context.label}: ${formatTime(seconds)}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock script %}
