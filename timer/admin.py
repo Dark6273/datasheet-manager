@@ -84,9 +84,9 @@ class ProjectAdmin(ModelAdmin):
 
 @admin.register(models.TimerRecord)
 class TimerRecordAdmin(ModelAdmin):
-    list_display = ('task_short', 'project_name', 'tag_name', 'formatted_time', "formatted_created_at")
+    list_display = ('user_username', 'task_short', 'project_name', 'tag_name', 'formatted_time', "formatted_created_at")
     list_filter = ('project', 'project__tag', 'created_at')
-    search_fields = ('task', 'project__name')
+    search_fields = ('task', 'project__name', 'user_username')
     date_hierarchy = 'created_at'
     ordering = ('-created_at',)
     
@@ -100,6 +100,13 @@ class TimerRecordAdmin(ModelAdmin):
         }),
     )
     readonly_fields = ('created_at',)
+
+    def user_username(self, obj):
+        if not obj.user:
+            return "null"
+        return obj.user.username
+
+    user_username.short_description = 'Username' 
     
     def task_short(self, obj):
         return obj.task[:50] + '...' if len(obj.task) > 50 else obj.task

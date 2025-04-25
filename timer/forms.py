@@ -21,12 +21,21 @@ class TimerForm(forms.ModelForm):
         return time
 
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-        self.fields['time'].widget = forms.HiddenInput()
 
+        self.fields['time'].widget = forms.HiddenInput()
         self.fields['project'].widget.attrs['class'] = "form-control"
         self.fields['task'].widget.attrs['class'] = "form-control"
         self.fields['task'].widget.attrs['rows'] = 1
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if self.user:
+            instance.user = self.user
+        if commit:
+            instance.save()
+        return instance
 
 
 class ExportForm(forms.Form):

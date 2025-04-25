@@ -24,6 +24,9 @@ class TimerRecord(models.Model):
     time = models.DurationField(null=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     created_at = jmodels.jDateTimeField(auto_now_add=True)
+    user = models.ForeignKey(
+        "auth.User", on_delete=models.CASCADE, null=True, blank=True
+    )
 
     def __str__(self) -> str:
         return f"{self.task} - {self.project}:{self.project.tag} - {self.time}"

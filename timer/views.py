@@ -21,8 +21,8 @@ def format_timedelta(td):
     return f"{hours:02}:{minutes:02}:{seconds:02}"
 
 
-def extract_timesheet(start_time: jDateField, end_time: jDateField, project: Project|None, tag: Tag|None):
-    query = Q(created_at__gte=start_time) & Q(created_at__lte=end_time + timedelta(days=1))
+def extract_timesheet(user, start_time: jDateField, end_time: jDateField, project: Project|None, tag: Tag|None):
+    query = Q(user=user) & Q(created_at__gte=start_time) & Q(created_at__lte=end_time + timedelta(days=1))
 
     if tag:
         query &= Q(project__tag=tag)
@@ -47,16 +47,19 @@ def extract_timesheet(start_time: jDateField, end_time: jDateField, project: Pro
 
 def timer_view(request):
     if request.method == 'POST':
-        form = TimerForm(request.POST)
+        form = TimerForm(request.POST, user=request.user)
 
         if form.is_valid():
             form.save()
         else:
             return HttpResponse(form.errors.as_ul())
         
-    form = TimerForm()
+    form = TimerForm(user=request.user)
     export_form = ExportForm() 
-    records = TimerRecord.objects.all().order_by('-created_at')[:25]
+    if request.user.is_authenticated:
+        records = TimerRecord.objects.filter(user=request.user).all().order_by('-created_at')[:25]
+    else:
+        records = []
     return render(request, 'timer.html', {'form': form, 'export_form': export_form, 'records': records})
 
 
@@ -71,7 +74,7 @@ def export_to_excel(request):
         return HttpResponse(form.errors.as_ul())
     
     cleaned_data = form.cleaned_data
-    df = extract_timesheet(cleaned_data['start_date'], cleaned_data['end_date'], cleaned_data['project_name'], cleaned_data['project_tag'])
+    df = extract_timesheet(request.user, cleaned_data['start_date'], cleaned_data['end_date'], cleaned_data['project_name'], cleaned_data['project_tag'])
 
     if df is None:
         return HttpResponse("<h1>Timesheet is Null</h1><br/><a href='/'>back to timer</a>")
@@ -102,14 +105,16 @@ def performance_view(request):
     month_start_gregorian = month_start.togregorian()
 
     daily_records = TimerRecord.objects.filter(
-        created_at__date=today_gregorian.date()
+        created_at__date=today_gregorian.date(),
+        user=request.user
     )
     daily_total_time = daily_records.aggregate(total=Sum('time'))['total'] or timedelta()
     daily_project_times = daily_records.values('project__name').annotate(total=Sum('time'))
 
     monthly_records = TimerRecord.objects.filter(
         created_at__gte=month_start_gregorian,
-        created_at__lte=today_gregorian
+        created_at__lte=today_gregorian,
+        user=request.user
     )
     monthly_total_time = monthly_records.aggregate(total=Sum('time'))['total'] or timedelta()
     monthly_project_times = monthly_records.values('project__name').annotate(total=Sum('time'))
