@@ -92,7 +92,7 @@ class TimerRecordAdmin(ModelAdmin):
     
     fieldsets = (
         (None, {
-            'fields': ('task', 'time', 'project'),
+            'fields': ('user', 'task', 'time', 'project'),
         }),
         ('اطلاعات زمان', {
             'fields': ('created_at',),
