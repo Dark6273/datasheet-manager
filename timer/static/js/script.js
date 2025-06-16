@@ -2,11 +2,11 @@ var timer;
 var startTime = 0;
 var recordedtime = 0;
 var pausetime = 0;
-let isSaved = false;
+let isSaved = true;
+console.log(isSaved)
 
 function startTimer() {
   isSaved = false;
-  console.log(isSaved);
   startTime = new Date(Date.now());
   pausetime = new Date(Date.now());
   timer = setInterval(updateTimer, 1000);
@@ -15,13 +15,12 @@ function startTimer() {
 }
 
 function stopTimer() {
-  clearInterval(timer);
-  document.getElementById("stopTimeInput").value =
-    document.getElementById("timer").innerHTML;
-  document.getElementById("startButton").disabled = false;
-  document.getElementById("stopButton").disabled = true;
   isSaved = true;
-  console.log(isSaved);
+  // clearInterval(timer);
+  // document.getElementById("stopTimeInput").value =
+  // document.getElementById("timer").innerHTML;
+  // document.getElementById("startButton").disabled = false;
+  // document.getElementById("stopButton").disabled = true;
 }
 
 function onPause() {

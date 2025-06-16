@@ -16,7 +16,7 @@
 
       <form id="timerForm" method="post" style="" class="pt-5">
         {% csrf_token %} {{ form.as_p }}
-        <button type="submit" class="btn btn-success">Save Stop Time</button>
+        <button id="stopButton" type="submit" class="btn btn-success">Save Stop Time</button>
       </form>
     </div>
 
