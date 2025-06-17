@@ -2,8 +2,11 @@ var timer;
 var startTime = 0;
 var recordedtime = 0;
 var pausetime = 0;
+let isSaved = true;
+console.log(isSaved)
 
 function startTimer() {
+  isSaved = false;
   startTime = new Date(Date.now());
   pausetime = new Date(Date.now());
   timer = setInterval(updateTimer, 1000);
@@ -12,11 +15,12 @@ function startTimer() {
 }
 
 function stopTimer() {
-  clearInterval(timer);
-  document.getElementById("stopTimeInput").value =
-    document.getElementById("timer").innerHTML;
-  document.getElementById("startButton").disabled = false;
-  document.getElementById("stopButton").disabled = true;
+  isSaved = true;
+  // clearInterval(timer);
+  // document.getElementById("stopTimeInput").value =
+  // document.getElementById("timer").innerHTML;
+  // document.getElementById("startButton").disabled = false;
+  // document.getElementById("stopButton").disabled = true;
 }
 
 function onPause() {
@@ -48,6 +52,13 @@ function updateTimer() {
 
   document.getElementById("timer").innerHTML = formattedTime;
 }
+
+window.addEventListener("beforeunload", function (e) {
+  if (!isSaved) {
+    e.preventDefault();
+    e.returnValue = ""; // فعال‌سازی هشدار خروج
+  }
+});
 
 document
   .getElementById("timerForm")
