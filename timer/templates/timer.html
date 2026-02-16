@@ -6,81 +6,145 @@
 {% block title %} Timer {% endblock title %} 
 
 {% block body %}
-<div class="row mb-3 text-center">
-  <div class="col-md-5 themed-grid-col p-5">
-    <div class="border-bottom pb-4">
-      <div id="timer" class="fs-1">00:00:00</div>
-      <button id="startButton" class="btn btn-outline-success">Start</button>
-      <button id="pause" class="btn btn-outline-danger" onclick="javascript:onPause()" disabled>pause</button>
-      <br />
+<section class="page">
+  <div class="page__header">
+    <div>
+      <p class="eyebrow">Time Tracking</p>
+      <h1 class="page__title">Focus Timer</h1>
+      <p class="page__subtitle">Track sessions, attach them to projects, and export clean reports.</p>
+    </div>
+  </div>
 
-      <form id="timerForm" method="post" style="" class="pt-5">
-        {% csrf_token %} {{ form.as_p }}
-        <button type="submit" class="btn btn-success">Save Stop Time</button>
+  <div class="timer-grid">
+    <div class="card timer-card">
+      <div class="timer-ring">
+        <svg class="timer-ring__svg" viewBox="0 0 160 160" aria-hidden="true">
+          <circle class="timer-ring__track" cx="80" cy="80" r="68"></circle>
+          <circle class="timer-ring__progress" cx="80" cy="80" r="68"></circle>
+        </svg>
+        <div class="timer-hand" aria-hidden="true">
+          <span class="timer-hand__glow"></span>
+          <span class="timer-hand__shaft"></span>
+          <span class="timer-hand__tip"></span>
+        </div>
+        <div class="timer-display" id="timer">00:00:00</div>
+      </div>
+      <div class="timer-actions">
+        <button id="startButton" class="btn btn--primary" type="button">
+          <span class="icon material-symbols-rounded" aria-hidden="true">play_arrow</span>
+          Start
+        </button>
+        <button id="pauseButton" class="btn btn--ghost btn--pause" type="button" data-state="pause" disabled>
+          <span class="icon material-symbols-rounded" aria-hidden="true">pause</span>
+          Pause
+        </button>
+        <button id="resetButton" class="btn btn--ghost" type="button">
+          <span class="icon material-symbols-rounded" aria-hidden="true">restart_alt</span>
+          Reset
+        </button>
+      </div>
+      <label class="toggle">
+        <input id="backgroundToggle" class="toggle__input" type="checkbox" />
+        <span class="toggle__track" aria-hidden="true">
+          <span class="toggle__thumb"></span>
+        </span>
+        <span>Keep timer running in background</span>
+      </label>
+
+      <form id="timerForm" method="post" class="stack" aria-label="Save timer entry">
+        {% csrf_token %}
+        {% if form.errors %}
+          <div class="card">
+            {{ form.errors }}
+          </div>
+        {% endif %}
+        <div class="stack">
+          <label class="label" for="{{ form.task.id_for_label }}">Task</label>
+          {{ form.task }}
+        </div>
+        <div class="stack">
+          <label class="label" for="{{ form.project.id_for_label }}">Project</label>
+          {{ form.project }}
+        </div>
+        {{ form.time }}
+        <button type="submit" class="btn btn--primary">
+          <span class="icon material-symbols-rounded" aria-hidden="true">save</span>
+          Save Session
+        </button>
       </form>
     </div>
 
-    <div class="pt-5">
-        <h4>Export Timesheet</h4>
-        <form method="post" action="{% url 'export-view' %}">
-            <div class="row">
-                <div class="form-group col-md-6">
-                    <label for="{{ export_form.start_date.id_for_label }}"></label>
-                    {{ export_form.start_date }}
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="{{ export_form.end_date.id_for_label }}"></label>
-                    {{ export_form.end_date }}
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="form-group col-md-6">
-                    <label for="{{ export_form.project_name.id_for_label }}"></label>
-                    {{ export_form.project_name }}
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="{{ export_form.project_tag.id_for_label }}"></label>
-                    {{ export_form.project_tag }}
-                </div>
-            </div>
-            <br>
-
-            <div class="row">
-                <div class="form-group col-md-6">
-                    <label for="{{ export_form.export_format.id_for_label }}"></label>
-                    {{ export_form.export_format }}
-                </div>
-                <div class="form-group col-md-6">
-                    <input type="submit" class="form-control btn btn-primary" value="export">
-                </div>
-            </div>
-        </form>
+    <div class="card card--form export-card">
+      <h2 class="card__title">Export Timesheet</h2>
+      <form method="post" action="{% url 'export-view' %}" class="stack export-form">
+        {% csrf_token %}
+        <div class="field-grid">
+          <div class="stack">
+            <label class="label" for="{{ export_form.start_date.id_for_label }}">Start date</label>
+            {{ export_form.start_date }}
+          </div>
+          <div class="stack">
+            <label class="label" for="{{ export_form.end_date.id_for_label }}">End date</label>
+            {{ export_form.end_date }}
+          </div>
+        </div>
+        <div class="field-grid">
+          <div class="stack">
+            <label class="label" for="{{ export_form.project_name.id_for_label }}">Project</label>
+            {{ export_form.project_name }}
+          </div>
+          <div class="stack">
+            <label class="label" for="{{ export_form.project_tag.id_for_label }}">Tag</label>
+            {{ export_form.project_tag }}
+          </div>
+        </div>
+        <div class="field-grid">
+          <div class="stack">
+            <label class="label" for="{{ export_form.export_format.id_for_label }}">Format</label>
+            {{ export_form.export_format }}
+          </div>
+          <div class="stack">
+            <label class="label">&nbsp;</label>
+        <button class="btn btn--ghost" type="submit">
+          <span class="icon material-symbols-rounded" aria-hidden="true">download</span>
+          Export
+        </button>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
 
-  <div class="col-md-7 themed-grid-col p-5">
-    <h1 class="pb-5">Record History</h1>
-    <table class="table table-striped table-hover">
-      <tr>
-        <th>Project</th>
-        <th>Tag</th>
-        <th>Task</th>
-        <th>Time</th>
-        <th>Date</th>
-      </tr>
-      {% for record in records %}
-      <tr>
-        <td>{{ record.project }}</td>
-        <td>{{ record.project.tag }}</td>
-        <td>{{ record.task }}</td>
-        <td>{{ record.time }}</td>
-        <td>{{ record.created_at|to_jalali }}</td>
-      </tr>
-      {% endfor %}
+  <div class="card">
+    <h2 class="card__title">Recent Records</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Project</th>
+          <th>Tag</th>
+          <th>Task</th>
+          <th>Time</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for record in records %}
+        <tr>
+          <td>{{ record.project }}</td>
+          <td>{{ record.project.tag }}</td>
+          <td>{{ record.task }}</td>
+          <td>{{ record.time }}</td>
+          <td>{{ record.created_at|to_jalali }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5">No records yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
   </div>
-</div>
+</section>
 <!-- By default, Datepicker using jQuery, you need to set your script after loading jQuery! -->
 	<!-- loading directly -->
     <link rel="stylesheet" href="{% static 'admin/jquery.ui.datepicker.jalali/themes/base/jquery-ui.min.css' %}">

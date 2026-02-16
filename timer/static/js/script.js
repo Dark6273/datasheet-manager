@@ -1,63 +1,173 @@
-var timer;
-var startTime = 0;
-var recordedtime = 0;
-var pausetime = 0;
+let timer = null;
+let startTimestamp = 0;
+let elapsedMs = 0;
+
+const startButton = document.getElementById("startButton");
+const pauseButton = document.getElementById("pauseButton");
+const timerDisplay = document.getElementById("timer");
+const timeInput = document.getElementById("id_time");
+const timerForm = document.getElementById("timerForm");
+const backgroundToggle = document.getElementById("backgroundToggle");
+const ring = document.querySelector(".timer-ring__progress");
+const hand = document.querySelector(".timer-hand");
+const resetButton = document.getElementById("resetButton");
+
+const STORAGE_KEY = "timerState";
+const BACKGROUND_KEY = "timerBackground";
+const RING_CIRCUMFERENCE = 2 * Math.PI * 68;
+
+function setPauseButton(state) {
+  pauseButton.dataset.state = state;
+  if (state === "pause") {
+    pauseButton.innerHTML =
+      '<span class="icon material-symbols-rounded" aria-hidden="true">pause</span>Pause';
+    pauseButton.classList.remove("btn--resume");
+    pauseButton.classList.add("btn--pause");
+  } else {
+    pauseButton.innerHTML =
+      '<span class="icon material-symbols-rounded" aria-hidden="true">play_arrow</span>Resume';
+    pauseButton.classList.remove("btn--pause");
+    pauseButton.classList.add("btn--resume");
+  }
+}
+
+function formatTime(ms) {
+  const totalSeconds = Math.floor(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+}
+
+function render() {
+  timerDisplay.textContent = formatTime(elapsedMs);
+  if (ring) {
+    const seconds = Math.floor(elapsedMs / 1000);
+    const progress = (seconds % 60) / 60;
+    const offset = RING_CIRCUMFERENCE * (1 - progress);
+    ring.style.strokeDasharray = `${RING_CIRCUMFERENCE}`;
+    ring.style.strokeDashoffset = `${offset}`;
+    if (hand) {
+      const angle = progress * 360;
+      hand.style.transform = `rotate(${angle}deg)`;
+      const strength = 0.35 + progress * 0.65;
+      hand.style.setProperty("--hand-strength", strength.toFixed(2));
+      hand.style.setProperty("--hand-glow", (0.15 + progress * 0.35).toFixed(2));
+    }
+  }
+}
+
+function tick() {
+  elapsedMs = Date.now() - startTimestamp;
+  render();
+}
+
+function persistState(running) {
+  const payload = {
+    running,
+    startTimestamp,
+    elapsedMs,
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+}
 
 function startTimer() {
-  startTime = new Date(Date.now());
-  pausetime = new Date(Date.now());
-  timer = setInterval(updateTimer, 1000);
-  document.getElementById("startButton").disabled = true;
-  document.getElementById("pause").removeAttribute("disabled");
+  startTimestamp = Date.now() - elapsedMs;
+  timer = setInterval(tick, 1000);
+  startButton.disabled = true;
+  pauseButton.disabled = false;
+  setPauseButton("pause");
+  persistState(true);
 }
 
-function stopTimer() {
+function pauseTimer() {
   clearInterval(timer);
-  document.getElementById("stopTimeInput").value =
-    document.getElementById("timer").innerHTML;
-  document.getElementById("startButton").disabled = false;
-  document.getElementById("stopButton").disabled = true;
+  setPauseButton("resume");
+  persistState(false);
 }
 
-function onPause() {
+function resumeTimer() {
+  startTimestamp = Date.now() - elapsedMs;
+  timer = setInterval(tick, 1000);
+  setPauseButton("pause");
+  persistState(true);
+}
+
+pauseButton.addEventListener("click", () => {
+  if (pauseButton.dataset.state === "pause") {
+    pauseTimer();
+  } else {
+    resumeTimer();
+  }
+});
+
+startButton.addEventListener("click", startTimer);
+
+resetButton.addEventListener("click", () => {
   clearInterval(timer);
-  console.log("pause clicked");
-  let button = document.querySelector("#pause");
-  button.innerText = "Resume";
-  button.id = "Resume";
-  button.classList = "btn btn-outline-info";
-  button.setAttribute("onclick", "onResume()");
-}
+  timer = null;
+  elapsedMs = 0;
+  startTimestamp = 0;
+  render();
+  startButton.disabled = false;
+  pauseButton.disabled = true;
+  setPauseButton("pause");
+  localStorage.removeItem(STORAGE_KEY);
+});
 
-function onResume() {
-  pausetime = new Date(Date.now() - recordedtime);
-  console.log("resume clicked");
-  let button = document.querySelector("#resume");
-  button.innerText = "Pause";
-  button.id = "Pause";
-  button.classList = "btn btn-outline-danger";
-  button.setAttribute("onclick", "onPause()");
-  timer = setInterval(updateTimer, 1000);
-}
+timerForm.addEventListener("submit", () => {
+  clearInterval(timer);
+  timeInput.value = elapsedMs;
+  elapsedMs = 0;
+  startTimestamp = 0;
+  render();
+  startButton.disabled = false;
+  pauseButton.disabled = true;
+  setPauseButton("pause");
+  localStorage.removeItem(STORAGE_KEY);
+});
 
-function updateTimer() {
-  var currentTime = new Date(Date.now());
-  var elapsedTime = new Date(currentTime - pausetime);
-  recordedtime = elapsedTime;
-  var formattedTime = recordedtime.toISOString().substr(11, 8);
-
-  document.getElementById("timer").innerHTML = formattedTime;
-}
-
-document
-  .getElementById("timerForm")
-  .addEventListener("submit", function (event) {
-    clearInterval(timer);
-    var stopTime = Date.now();
-    pausetime = new Date(Date.now() - recordedtime);
-    var temp = stopTime - pausetime;
-    document.getElementById("id_time").value = temp;
+if (backgroundToggle) {
+  const savedBackground = localStorage.getItem(BACKGROUND_KEY) === "true";
+  backgroundToggle.checked = savedBackground;
+  backgroundToggle.addEventListener("change", () => {
+    localStorage.setItem(BACKGROUND_KEY, backgroundToggle.checked ? "true" : "false");
   });
+}
 
-document.getElementById("startButton").addEventListener("click", startTimer);
-document.getElementById("stopButton").addEventListener("click", stopTimer);
+function restoreTimer() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) {
+    return;
+  }
+  try {
+    const data = JSON.parse(raw);
+    elapsedMs = data.elapsedMs || 0;
+    startTimestamp = data.startTimestamp || Date.now() - elapsedMs;
+    render();
+    if (data.running) {
+      timer = setInterval(tick, 1000);
+      startButton.disabled = true;
+      pauseButton.disabled = false;
+      setPauseButton("pause");
+    } else {
+      setPauseButton("resume");
+    }
+  } catch (error) {
+    localStorage.removeItem(STORAGE_KEY);
+  }
+}
+
+restoreTimer();
+
+window.addEventListener("beforeunload", (event) => {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  const allowBackground = localStorage.getItem(BACKGROUND_KEY) === "true";
+  if (!raw || allowBackground) {
+    return;
+  }
+  event.preventDefault();
+  event.returnValue = "";
+});

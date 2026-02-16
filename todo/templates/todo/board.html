@@ -1,0 +1,158 @@
+<div class="board" id="todo-board">
+  <div class="lane">
+    <div class="lane__header">
+      <h3>Todo</h3>
+      <span class="count">{{ todo_items|length }}</span>
+    </div>
+    <div class="lane__content">
+      {% if not todo_items %}
+        <div class="lane__empty">
+          <div class="lane__empty-icon">⚡</div>
+          <div class="lane__empty-title">No tasks yet</div>
+          <div class="lane__empty-subtitle">Add a task to start moving work.</div>
+        </div>
+      {% endif %}
+      {% for item in todo_items %}
+        <article class="task" data-task-title="{{ item.title }}" data-task-project="{{ item.project }}" data-task-priority="{{ item.priority }}" data-task-details="{{ item.details }}" data-task-due="{{ item.due_date|date:'Y-m-d H:i' }}">
+          <div class="task__head">
+            <div class="task__title">{{ item.title }}</div>
+            <span class="chip chip--{{ item.priority }}">{{ item.priority }}</span>
+          </div>
+          {% if item.project %}
+            <div class="task__project">
+              <span class="chip chip--project">{{ item.project }}</span>
+            </div>
+          {% endif %}
+          {% if item.details %}<p class="task__details">{{ item.details }}</p>{% endif %}
+          <div class="task__meta">
+            {% if item.due_date %}
+              <span class="chip {% if item.is_overdue %}chip--danger{% else %}chip--muted{% endif %}">
+                Due {{ item.due_date|date:"Y-m-d H:i" }}
+              </span>
+            {% endif %}
+          </div>
+          <div class="task__actions">
+            <form method="post" action="{% url 'todo-update' item.id 'doing' %}" hx-post="{% url 'todo-update' item.id 'doing' %}" hx-target="#todo-board" hx-swap="outerHTML" hx-select="#todo-board">
+              {% csrf_token %}
+              <button class="btn btn--ghost" type="submit">
+                <span class="icon material-symbols-rounded" aria-hidden="true">play_arrow</span>
+                Start
+              </button>
+            </form>
+            <form method="post" action="{% url 'todo-delete' item.id %}" hx-post="{% url 'todo-delete' item.id %}" hx-target="#todo-board" hx-swap="outerHTML" hx-select="#todo-board">
+              {% csrf_token %}
+              <button class="btn btn--text" type="submit">
+                <span class="icon material-symbols-rounded" aria-hidden="true">delete</span>
+                Remove
+              </button>
+            </form>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="lane">
+    <div class="lane__header">
+      <h3>Doing</h3>
+      <span class="count">{{ doing_items|length }}</span>
+    </div>
+    <div class="lane__content">
+      {% if not doing_items %}
+        <div class="lane__empty">
+          <div class="lane__empty-icon">⏳</div>
+          <div class="lane__empty-title">Nothing in progress</div>
+          <div class="lane__empty-subtitle">Move a task here when you start it.</div>
+        </div>
+      {% endif %}
+      {% for item in doing_items %}
+        <article class="task task--active" data-task-title="{{ item.title }}" data-task-project="{{ item.project }}" data-task-priority="{{ item.priority }}" data-task-details="{{ item.details }}" data-task-due="{{ item.due_date|date:'Y-m-d H:i' }}">
+          <div class="task__head">
+            <div class="task__title">{{ item.title }}</div>
+            <span class="chip chip--{{ item.priority }}">{{ item.priority }}</span>
+          </div>
+          {% if item.project %}
+            <div class="task__project">
+              <span class="chip chip--project">{{ item.project }}</span>
+            </div>
+          {% endif %}
+          {% if item.details %}<p class="task__details">{{ item.details }}</p>{% endif %}
+          <div class="task__meta">
+            {% if item.due_date %}
+              <span class="chip {% if item.is_overdue %}chip--danger{% else %}chip--muted{% endif %}">
+                Due {{ item.due_date|date:"Y-m-d H:i" }}
+              </span>
+            {% endif %}
+          </div>
+          <div class="task__actions">
+            <form method="post" action="{% url 'todo-update' item.id 'todo' %}" hx-post="{% url 'todo-update' item.id 'todo' %}" hx-target="#todo-board" hx-swap="outerHTML" hx-select="#todo-board">
+              {% csrf_token %}
+              <button class="btn btn--ghost" type="submit">
+                <span class="icon material-symbols-rounded" aria-hidden="true">undo</span>
+                Backlog
+              </button>
+            </form>
+            <form method="post" action="{% url 'todo-update' item.id 'done' %}" hx-post="{% url 'todo-update' item.id 'done' %}" hx-target="#todo-board" hx-swap="outerHTML" hx-select="#todo-board">
+              {% csrf_token %}
+              <button class="btn btn--primary" type="submit">
+                <span class="icon material-symbols-rounded" aria-hidden="true">check_circle</span>
+                Done
+              </button>
+            </form>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="lane">
+    <div class="lane__header">
+      <h3>Done</h3>
+      <span class="count">{{ done_items|length }}</span>
+    </div>
+    <div class="lane__content">
+      {% if not done_items %}
+        <div class="lane__empty">
+          <div class="lane__empty-icon">✅</div>
+          <div class="lane__empty-title">No completed tasks</div>
+          <div class="lane__empty-subtitle">Finish a task to see it here.</div>
+        </div>
+      {% endif %}
+      {% for item in done_items %}
+        <article class="task task--done" data-task-title="{{ item.title }}" data-task-project="{{ item.project }}" data-task-priority="{{ item.priority }}" data-task-details="{{ item.details }}" data-task-due="{{ item.due_date|date:'Y-m-d H:i' }}">
+          <div class="task__head">
+            <div class="task__title">{{ item.title }}</div>
+            <span class="chip chip--{{ item.priority }}">{{ item.priority }}</span>
+          </div>
+          {% if item.project %}
+            <div class="task__project">
+              <span class="chip chip--project">{{ item.project }}</span>
+            </div>
+          {% endif %}
+          {% if item.details %}<p class="task__details">{{ item.details }}</p>{% endif %}
+          <div class="task__meta">
+            {% if item.due_date %}
+              <span class="chip chip--muted">Due {{ item.due_date|date:"Y-m-d H:i" }}</span>
+            {% endif %}
+          </div>
+          <div class="task__actions">
+            <form method="post" action="{% url 'todo-update' item.id 'doing' %}" hx-post="{% url 'todo-update' item.id 'doing' %}" hx-target="#todo-board" hx-swap="outerHTML" hx-select="#todo-board">
+              {% csrf_token %}
+              <button class="btn btn--ghost" type="submit">
+                <span class="icon material-symbols-rounded" aria-hidden="true">refresh</span>
+                Reopen
+              </button>
+            </form>
+            <form method="post" action="{% url 'todo-delete' item.id %}" hx-post="{% url 'todo-delete' item.id %}" hx-target="#todo-board" hx-swap="outerHTML" hx-select="#todo-board">
+              {% csrf_token %}
+              <button class="btn btn--text" type="submit">
+                <span class="icon material-symbols-rounded" aria-hidden="true">delete</span>
+                Remove
+              </button>
+            </form>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </div>
+</div>

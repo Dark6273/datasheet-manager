@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Todo Board{% endblock title %}
+
+{% block body %}
+<section class="page">
+  <div class="page__header">
+    <div>
+      <p class="eyebrow">Todo Workspace</p>
+      <h1 class="page__title">Focus Board</h1>
+      <p class="page__subtitle">Keep momentum with clear priorities and status lanes.</p>
+    </div>
+    <div class="page__action">
+      <span class="badge">{{ todo_items|length }} Todo</span>
+      <span class="badge badge--warn">{{ doing_items|length }} Doing</span>
+      <span class="badge badge--success">{{ done_items|length }} Done</span>
+      <button class="btn btn--ghost" type="button" data-modal-open="todo-search-modal">
+        <span class="icon material-symbols-rounded" aria-hidden="true">search</span>
+        Search
+      </button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="card card--form">
+      <h2 class="card__title">Add New Task</h2>
+      <form method="post" class="stack" hx-post="{% url 'todo-list' %}" hx-target="#todo-board" hx-swap="outerHTML" hx-select="#todo-board">
+        {% csrf_token %}
+        {% if form.errors %}
+          <div class="empty">{{ form.errors }}</div>
+        {% endif %}
+        <div class="stack">
+          <label class="label" for="{{ form.title.id_for_label }}">Title</label>
+          {{ form.title }}
+        </div>
+        <div class="stack">
+          <label class="label" for="{{ form.details.id_for_label }}">Details</label>
+          {{ form.details }}
+        </div>
+        <div class="stack">
+          <label class="label" for="{{ form.project.id_for_label }}">Project</label>
+          {{ form.project }}
+        </div>
+        <div class="field-grid">
+          <div class="stack">
+            <label class="label" for="{{ form.priority.id_for_label }}">Priority</label>
+            {{ form.priority }}
+          </div>
+          <div class="stack">
+            <label class="label" for="{{ form.due_date.id_for_label }}">Due date</label>
+            {{ form.due_date }}
+          </div>
+        </div>
+        <button class="btn btn--primary" type="submit">
+          <span class="icon material-symbols-rounded" aria-hidden="true">add</span>
+          Create Task
+        </button>
+      </form>
+    </div>
+
+    {% include "todo/board.html" %}
+  </div>
+</section>
+
+<div class="modal" id="todo-search-modal" aria-hidden="true">
+  <div class="modal__backdrop" data-modal-close></div>
+  <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="todo-search-title">
+    <div class="modal__header">
+      <h2 id="todo-search-title">Search Tasks</h2>
+      <button class="btn btn--text" type="button" data-modal-close>
+        <span class="icon material-symbols-rounded" aria-hidden="true">close</span>
+        Close
+      </button>
+    </div>
+    <form
+      method="get"
+      class="stack"
+      action="{% url 'todo-search' %}"
+      hx-get="{% url 'todo-search' %}"
+      hx-target="#todo-board"
+      hx-swap="outerHTML"
+    >
+      <div class="stack">
+        <label class="label" for="todo-search">Search</label>
+        <input id="todo-search" class="field" name="q" type="search" placeholder="Search by title, details, or project" value="{{ query|default_if_none:'' }}">
+      </div>
+      <button class="btn btn--primary" type="submit">
+        <span class="icon material-symbols-rounded" aria-hidden="true">search</span>
+        Search
+      </button>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="todo-detail-modal" aria-hidden="true">
+  <div class="modal__backdrop" data-modal-close></div>
+  <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="todo-detail-title">
+    <div class="modal__header">
+      <h2 id="todo-detail-title">Task Details</h2>
+      <button class="btn btn--text" type="button" data-modal-close>
+        <span class="icon material-symbols-rounded" aria-hidden="true">close</span>
+        Close
+      </button>
+    </div>
+    <div class="task-detail">
+      <div class="task-detail__row">
+        <span class="label">Title</span>
+        <span id="task-detail-title" class="task-detail__value"></span>
+      </div>
+      <div class="task-detail__row">
+        <span class="label">Project</span>
+        <span id="task-detail-project" class="task-detail__value"></span>
+      </div>
+      <div class="task-detail__row">
+        <span class="label">Priority</span>
+        <span id="task-detail-priority" class="task-detail__value"></span>
+      </div>
+      <div class="task-detail__row">
+        <span class="label">Due</span>
+        <span id="task-detail-due" class="task-detail__value"></span>
+      </div>
+      <div class="task-detail__row task-detail__row--stack">
+        <span class="label">Details</span>
+        <p id="task-detail-details" class="task-detail__value"></p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock body %}

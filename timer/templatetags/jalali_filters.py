@@ -1,18 +1,18 @@
-from django import template
 import jdatetime
+from django import template
 
 register = template.Library()
 
+
 @register.filter
-def to_jalali(value, date_format='%Y/%m/%d'):
+def to_jalali(value, date_format="%Y/%m/%d"):
     if not value:
-        return ''
+        return ""
 
     if isinstance(value, jdatetime.datetime) or isinstance(value, jdatetime.date):
         return value.strftime(date_format)
     try:
-        jalali_date = jdatetime.datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
+        jalali_date = jdatetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
         return jalali_date.strftime(date_format)
     except ValueError:
         return value
-
