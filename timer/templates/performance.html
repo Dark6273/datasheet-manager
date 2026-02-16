@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Performance Report{% endblock title %}
+{% block header %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+{% endblock header %}
+
+{% block body %}
+<section class="page">
+  <div class="page__header">
+    <div>
+      <p class="eyebrow">Insights</p>
+      <h1 class="page__title">Performance Report</h1>
+      <p class="page__subtitle">Visualize how time is distributed across projects.</p>
+    </div>
+  </div>
+
+  <div class="performance-grid">
+    <div class="chart-card">
+      <div class="chart-card__header">
+        <div>
+          <h3>Today</h3>
+          <p class="muted">Total {{ daily_total_time }}</p>
+        </div>
+        <span class="stat-pill">Daily</span>
+      </div>
+      <div class="chart-card__body">
+        <div class="chart-shell chart-shell--large">
+          <canvas id="dailyChart" width="260" height="260"></canvas>
+        </div>
+        <div class="chart-list">
+          {% for project, time in daily_project_times %}
+            <div class="chart-list__row">
+              <span>{{ project }}</span>
+              <span class="muted">{{ time }}</span>
+            </div>
+          {% empty %}
+            <div class="chart-list__row muted">No data available</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-card__header">
+        <div>
+          <h3>This Month</h3>
+          <p class="muted">Total {{ monthly_total_time }}</p>
+        </div>
+        <span class="stat-pill stat-pill--accent">Monthly</span>
+      </div>
+      <div class="chart-card__body">
+        <div class="chart-shell chart-shell--large">
+          <canvas id="monthlyChart" width="260" height="260"></canvas>
+        </div>
+        <div class="chart-list">
+          {% for project, time in monthly_project_times %}
+            <div class="chart-list__row">
+              <span>{{ project }}</span>
+              <span class="muted">{{ time }}</span>
+            </div>
+          {% empty %}
+            <div class="chart-list__row muted">No data available</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock body %}
+{% block script %}
+    <script>
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Format time to HH:MM:SS
+            function formatTime(seconds) {
+                const hrs = Math.floor(seconds / 3600);
+                const mins = Math.floor((seconds % 3600) / 60);
+                const secs = seconds % 60;
+                return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            // Daily Chart
+            const dailyData = {
+                labels: [{% for project, _ in daily_project_times %}'{{ project }}',{% endfor %}],
+                datasets: [{
+                    data: [{% for _, time in daily_project_times %}{{ time.total_seconds|default:0|floatformat:0 }},{% endfor %}],
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
+                }]
+            };
+            const dailyCtx = document.getElementById('dailyChart').getContext('2d');
+            new Chart(dailyCtx, {
+                type: 'doughnut',
+                data: dailyData.labels.length && dailyData.datasets[0].data.some(d => d > 0) ? dailyData : {
+                    labels: ['No Data'],
+                    datasets: [{ data: [1], backgroundColor: ['#CCCCCC'] }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let seconds = context.parsed || 0;
+                                    return `${context.label}: ${formatTime(seconds)}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Monthly Chart
+            const monthlyData = {
+                labels: [{% for project, _ in monthly_project_times %}'{{ project }}',{% endfor %}],
+                datasets: [{
+                    data: [{% for _, time in monthly_project_times %}{{ time.total_seconds|default:0|floatformat:0 }},{% endfor %}],
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
+                }]
+            };
+            const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+            new Chart(monthlyCtx, {
+                type: 'doughnut',
+                data: monthlyData.labels.length && monthlyData.datasets[0].data.some(d => d > 0) ? monthlyData : {
+                    labels: ['No Data'],
+                    datasets: [{ data: [1], backgroundColor: ['#CCCCCC'] }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let seconds = context.parsed || 0;
+                                    return `${context.label}: ${formatTime(seconds)}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock script %}
