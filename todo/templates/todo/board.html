@@ -13,7 +13,7 @@
         </div>
       {% endif %}
       {% for item in todo_items %}
-        <article class="task" data-task-title="{{ item.title }}" data-task-project="{{ item.project|default_if_none:'' }}" data-task-parent="{{ item.parent_title }}" data-task-subtasks="{{ item.subtask_titles }}" data-task-priority="{{ item.priority }}" data-task-details="{{ item.details }}" data-task-due="{{ item.due_date|date:'Y-m-d H:i' }}">
+        <article class="task" data-task-id="{{ item.id }}" data-task-title="{{ item.title }}" data-task-project="{{ item.project|default_if_none:'' }}" data-task-parent="{{ item.parent_title }}" data-task-subtasks="{{ item.subtask_titles }}" data-task-priority="{{ item.priority }}" data-task-details="{{ item.details }}" data-task-due="{{ item.due_date|date:'Y-m-d H:i' }}">
           <div class="task__head">
             <div class="task__title">{{ item.title }}</div>
             <span class="chip chip--{{ item.priority }}">{{ item.priority }}</span>
@@ -71,7 +71,7 @@
         </div>
       {% endif %}
       {% for item in doing_items %}
-        <article class="task task--active" data-task-title="{{ item.title }}" data-task-project="{{ item.project|default_if_none:'' }}" data-task-parent="{{ item.parent_title }}" data-task-subtasks="{{ item.subtask_titles }}" data-task-priority="{{ item.priority }}" data-task-details="{{ item.details }}" data-task-due="{{ item.due_date|date:'Y-m-d H:i' }}">
+        <article class="task task--active" data-task-id="{{ item.id }}" data-task-title="{{ item.title }}" data-task-project="{{ item.project|default_if_none:'' }}" data-task-parent="{{ item.parent_title }}" data-task-subtasks="{{ item.subtask_titles }}" data-task-priority="{{ item.priority }}" data-task-details="{{ item.details }}" data-task-due="{{ item.due_date|date:'Y-m-d H:i' }}">
           <div class="task__head">
             <div class="task__title">{{ item.title }}</div>
             <span class="chip chip--{{ item.priority }}">{{ item.priority }}</span>
@@ -129,7 +129,7 @@
         </div>
       {% endif %}
       {% for item in done_items %}
-        <article class="task task--done" data-task-title="{{ item.title }}" data-task-project="{{ item.project|default_if_none:'' }}" data-task-parent="{{ item.parent_title }}" data-task-subtasks="{{ item.subtask_titles }}" data-task-priority="{{ item.priority }}" data-task-details="{{ item.details }}" data-task-due="{{ item.due_date|date:'Y-m-d H:i' }}">
+        <article class="task task--done" data-task-id="{{ item.id }}" data-task-title="{{ item.title }}" data-task-project="{{ item.project|default_if_none:'' }}" data-task-parent="{{ item.parent_title }}" data-task-subtasks="{{ item.subtask_titles }}" data-task-priority="{{ item.priority }}" data-task-details="{{ item.details }}" data-task-due="{{ item.due_date|date:'Y-m-d H:i' }}">
           <div class="task__head">
             <div class="task__title">{{ item.title }}</div>
             <span class="chip chip--{{ item.priority }}">{{ item.priority }}</span>

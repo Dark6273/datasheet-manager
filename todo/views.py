@@ -5,8 +5,8 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from .forms import TodoItemForm
-from .models import TodoItem
+from .forms import TodoItemForm, WorkLogForm
+from .models import TodoItem, WorkLog
 
 
 def _todo_queryset():
@@ -103,3 +103,29 @@ def delete_item(request: HttpRequest, item_id: int) -> HttpResponse:
     if request.headers.get("HX-Request") == "true":
         return _render_board(request)
     return redirect("todo-list")
+
+
+def worklog_list(
+    request: HttpRequest, item_id: int, form: WorkLogForm | None = None
+) -> HttpResponse:
+    """Return work log list for a todo item."""
+    item = get_object_or_404(TodoItem, pk=item_id)
+    form = form or WorkLogForm()
+    return render(
+        request,
+        "todo/worklog_list.html",
+        {"item": item, "worklog_form": form},
+    )
+
+
+@require_POST
+def add_worklog(request: HttpRequest, item_id: int) -> HttpResponse:
+    """Create a work log entry for a todo item."""
+    item = get_object_or_404(TodoItem, pk=item_id)
+    form = WorkLogForm(request.POST)
+    if form.is_valid():
+        worklog = form.save(commit=False)
+        worklog.todo = item
+        worklog.save()
+        return worklog_list(request, item_id)
+    return worklog_list(request, item_id, form=form)

@@ -1,0 +1,48 @@
+<div class="worklog" id="worklog-container">
+  <div class="worklog__header">
+    <h3>Work Logs</h3>
+  </div>
+  <form
+    class="worklog__form"
+    method="post"
+    action="{% url 'todo-worklogs-add' item.id %}"
+    hx-post="{% url 'todo-worklogs-add' item.id %}"
+    hx-target="#worklog-container"
+    hx-swap="outerHTML"
+  >
+    {% csrf_token %}
+    {% if worklog_form.errors %}
+      <div class="empty">{{ worklog_form.errors }}</div>
+    {% endif %}
+    <div class="field-grid">
+      <div class="stack">
+        <label class="label" for="{{ worklog_form.duration_minutes.id_for_label }}">Duration (minutes)</label>
+        {{ worklog_form.duration_minutes }}
+      </div>
+      <div class="stack">
+        <label class="label" for="{{ worklog_form.note.id_for_label }}">Note</label>
+        {{ worklog_form.note }}
+      </div>
+    </div>
+    <button class="btn btn--primary" type="submit">
+      <span class="icon material-symbols-rounded" aria-hidden="true">add</span>
+      Add Work Log
+    </button>
+  </form>
+
+  <div class="worklog__list">
+    {% for log in item.worklogs.all %}
+      <div class="worklog__item">
+        <div class="worklog__meta">
+          <span class="chip chip--muted">{{ log.duration_minutes }} min</span>
+          <span class="worklog__date">{{ log.created_at|date:"Y-m-d H:i" }}</span>
+        </div>
+        {% if log.note %}
+          <p class="worklog__note">{{ log.note }}</p>
+        {% endif %}
+      </div>
+    {% empty %}
+      <div class="empty">No work logs yet.</div>
+    {% endfor %}
+  </div>
+</div>

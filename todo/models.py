@@ -77,3 +77,23 @@ class TodoItem(models.Model):
         if not children:
             return ""
         return " | ".join(child.title for child in children)
+
+
+class WorkLog(models.Model):
+    """Represents a work log entry for a todo item."""
+
+    todo = models.ForeignKey(
+        TodoItem,
+        on_delete=models.CASCADE,
+        related_name="worklogs",
+    )
+    note = models.TextField(blank=True)
+    duration_minutes = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        """Return a readable label for admin and logs."""
+        return f"{self.todo.title} - {self.duration_minutes}m"

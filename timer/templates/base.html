@@ -59,6 +59,7 @@
             const priority = taskCard.getAttribute("data-task-priority") || "—";
             const details = taskCard.getAttribute("data-task-details") || "—";
             const due = taskCard.getAttribute("data-task-due") || "—";
+            const taskId = taskCard.getAttribute("data-task-id");
             const titleEl = document.getElementById("task-detail-title");
             const projectEl = document.getElementById("task-detail-project");
             const parentEl = document.getElementById("task-detail-parent");
@@ -66,6 +67,7 @@
             const priorityEl = document.getElementById("task-detail-priority");
             const detailsEl = document.getElementById("task-detail-details");
             const dueEl = document.getElementById("task-detail-due");
+            const worklogContainer = document.getElementById("worklog-container");
             if (titleEl) titleEl.textContent = title;
             if (projectEl) projectEl.textContent = project;
             if (parentEl) parentEl.textContent = parent;
@@ -73,6 +75,15 @@
             if (priorityEl) priorityEl.textContent = priority;
             if (detailsEl) detailsEl.textContent = details;
             if (dueEl) dueEl.textContent = due;
+            if (worklogContainer && taskId) {
+              worklogContainer.innerHTML = "";
+              worklogContainer.setAttribute("hx-get", `/todo/${taskId}/worklogs/`);
+              worklogContainer.setAttribute("hx-trigger", "load");
+              worklogContainer.setAttribute("hx-swap", "outerHTML");
+              if (window.htmx) {
+                window.htmx.process(worklogContainer);
+              }
+            }
           }
         }
       });

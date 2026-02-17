@@ -101,7 +101,7 @@
 
 <div class="modal" id="todo-detail-modal" aria-hidden="true">
   <div class="modal__backdrop" data-modal-close></div>
-  <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="todo-detail-title">
+  <div class="modal__card modal__card--wide" role="dialog" aria-modal="true" aria-labelledby="todo-detail-title">
     <div class="modal__header">
       <h2 id="todo-detail-title">Task Details</h2>
       <button class="btn btn--text" type="button" data-modal-close>
@@ -139,6 +139,7 @@
         <p id="task-detail-details" class="task-detail__value"></p>
       </div>
     </div>
+    <div id="worklog-container" class="worklog__container"></div>
   </div>
 </div>
 {% endblock body %}

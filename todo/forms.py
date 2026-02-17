@@ -5,7 +5,7 @@ from datetime import timedelta
 from django import forms
 from django.utils import timezone
 
-from .models import TodoItem
+from .models import TodoItem, WorkLog
 
 
 class TodoItemForm(forms.ModelForm):
@@ -49,3 +49,23 @@ class TodoItemForm(forms.ModelForm):
         if due_date < timezone.localtime():
             raise forms.ValidationError("Due date cannot be in the past.")
         return due_date
+
+
+class WorkLogForm(forms.ModelForm):
+    """Form for creating work log entries."""
+
+    class Meta:
+        model = WorkLog
+        fields = ["note", "duration_minutes"]
+        widgets = {
+            "note": forms.Textarea(attrs={"rows": 2}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        """Initialize form widgets."""
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs.setdefault("class", "field")
+        self.fields["duration_minutes"].widget.attrs.setdefault(
+            "placeholder", "Minutes"
+        )
