@@ -604,6 +604,8 @@ textarea {
 .task__project {
   display: flex;
   gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .task__actions {
@@ -738,6 +740,8 @@ textarea {
 .task-detail__value {
   color: var(--text-strong);
   font-weight: 500;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .lane__header {

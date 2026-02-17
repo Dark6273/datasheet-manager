@@ -13,14 +13,19 @@
         </div>
       {% endif %}
       {% for item in todo_items %}
-        <article class="task" data-task-title="{{ item.title }}" data-task-project="{{ item.project }}" data-task-priority="{{ item.priority }}" data-task-details="{{ item.details }}" data-task-due="{{ item.due_date|date:'Y-m-d H:i' }}">
+        <article class="task" data-task-title="{{ item.title }}" data-task-project="{{ item.project|default_if_none:'' }}" data-task-parent="{{ item.parent_title }}" data-task-subtasks="{{ item.subtask_titles }}" data-task-priority="{{ item.priority }}" data-task-details="{{ item.details }}" data-task-due="{{ item.due_date|date:'Y-m-d H:i' }}">
           <div class="task__head">
             <div class="task__title">{{ item.title }}</div>
             <span class="chip chip--{{ item.priority }}">{{ item.priority }}</span>
           </div>
-          {% if item.project %}
+          {% if item.project or item.parent %}
             <div class="task__project">
-              <span class="chip chip--project">{{ item.project }}</span>
+              {% if item.project %}
+                <span class="chip chip--project">{{ item.project }}</span>
+              {% endif %}
+              {% if item.parent %}
+                <span class="chip chip--muted">Parent: {{ item.parent.title }}</span>
+              {% endif %}
             </div>
           {% endif %}
           {% if item.details %}<p class="task__details">{{ item.details }}</p>{% endif %}
@@ -66,14 +71,19 @@
         </div>
       {% endif %}
       {% for item in doing_items %}
-        <article class="task task--active" data-task-title="{{ item.title }}" data-task-project="{{ item.project }}" data-task-priority="{{ item.priority }}" data-task-details="{{ item.details }}" data-task-due="{{ item.due_date|date:'Y-m-d H:i' }}">
+        <article class="task task--active" data-task-title="{{ item.title }}" data-task-project="{{ item.project|default_if_none:'' }}" data-task-parent="{{ item.parent_title }}" data-task-subtasks="{{ item.subtask_titles }}" data-task-priority="{{ item.priority }}" data-task-details="{{ item.details }}" data-task-due="{{ item.due_date|date:'Y-m-d H:i' }}">
           <div class="task__head">
             <div class="task__title">{{ item.title }}</div>
             <span class="chip chip--{{ item.priority }}">{{ item.priority }}</span>
           </div>
-          {% if item.project %}
+          {% if item.project or item.parent %}
             <div class="task__project">
-              <span class="chip chip--project">{{ item.project }}</span>
+              {% if item.project %}
+                <span class="chip chip--project">{{ item.project }}</span>
+              {% endif %}
+              {% if item.parent %}
+                <span class="chip chip--muted">Parent: {{ item.parent.title }}</span>
+              {% endif %}
             </div>
           {% endif %}
           {% if item.details %}<p class="task__details">{{ item.details }}</p>{% endif %}
@@ -119,14 +129,19 @@
         </div>
       {% endif %}
       {% for item in done_items %}
-        <article class="task task--done" data-task-title="{{ item.title }}" data-task-project="{{ item.project }}" data-task-priority="{{ item.priority }}" data-task-details="{{ item.details }}" data-task-due="{{ item.due_date|date:'Y-m-d H:i' }}">
+        <article class="task task--done" data-task-title="{{ item.title }}" data-task-project="{{ item.project|default_if_none:'' }}" data-task-parent="{{ item.parent_title }}" data-task-subtasks="{{ item.subtask_titles }}" data-task-priority="{{ item.priority }}" data-task-details="{{ item.details }}" data-task-due="{{ item.due_date|date:'Y-m-d H:i' }}">
           <div class="task__head">
             <div class="task__title">{{ item.title }}</div>
             <span class="chip chip--{{ item.priority }}">{{ item.priority }}</span>
           </div>
-          {% if item.project %}
+          {% if item.project or item.parent %}
             <div class="task__project">
-              <span class="chip chip--project">{{ item.project }}</span>
+              {% if item.project %}
+                <span class="chip chip--project">{{ item.project }}</span>
+              {% endif %}
+              {% if item.parent %}
+                <span class="chip chip--muted">Parent: {{ item.parent.title }}</span>
+              {% endif %}
             </div>
           {% endif %}
           {% if item.details %}<p class="task__details">{{ item.details }}</p>{% endif %}

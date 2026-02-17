@@ -38,9 +38,15 @@
           <label class="label" for="{{ form.details.id_for_label }}">Details</label>
           {{ form.details }}
         </div>
-        <div class="stack">
-          <label class="label" for="{{ form.project.id_for_label }}">Project</label>
-          {{ form.project }}
+        <div class="field-grid">
+          <div class="stack">
+            <label class="label" for="{{ form.project.id_for_label }}">Project</label>
+            {{ form.project }}
+          </div>
+          <div class="stack">
+            <label class="label" for="{{ form.parent.id_for_label }}">Parent task</label>
+            {{ form.parent }}
+          </div>
         </div>
         <div class="field-grid">
           <div class="stack">
@@ -111,6 +117,14 @@
       <div class="task-detail__row">
         <span class="label">Project</span>
         <span id="task-detail-project" class="task-detail__value"></span>
+      </div>
+      <div class="task-detail__row">
+        <span class="label">Parent</span>
+        <span id="task-detail-parent" class="task-detail__value"></span>
+      </div>
+      <div class="task-detail__row task-detail__row--stack">
+        <span class="label">Subtasks</span>
+        <p id="task-detail-subtasks" class="task-detail__value"></p>
       </div>
       <div class="task-detail__row">
         <span class="label">Priority</span>

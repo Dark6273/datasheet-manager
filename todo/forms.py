@@ -13,7 +13,7 @@ class TodoItemForm(forms.ModelForm):
 
     class Meta:
         model = TodoItem
-        fields = ["title", "details", "project", "priority", "due_date"]
+        fields = ["title", "details", "project", "parent", "priority", "due_date"]
         widgets = {
             "details": forms.Textarea(attrs={"rows": 3}),
             "due_date": forms.DateTimeInput(attrs={"type": "datetime-local"}),
@@ -28,6 +28,8 @@ class TodoItemForm(forms.ModelForm):
         self.fields["details"].widget.attrs.setdefault(
             "placeholder", "What needs to be done?"
         )
+        self.fields["parent"].queryset = TodoItem.objects.select_related("project").all()
+        self.fields["parent"].required = False
 
         now = timezone.localtime()
         min_value = now.replace(second=0, microsecond=0)
