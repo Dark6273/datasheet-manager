@@ -32,6 +32,13 @@ class TodoItem(models.Model):
         blank=True,
         related_name="todo_items",
     )
+    parent = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="subtasks",
+    )
     status = models.CharField(
         max_length=10, choices=Status.choices, default=Status.TODO
     )
@@ -55,3 +62,18 @@ class TodoItem(models.Model):
         if not self.due_date:
             return False
         return self.due_date < timezone.localtime()
+
+    @property
+    def parent_title(self) -> str:
+        """Return parent task title for UI."""
+        if not self.parent:
+            return ""
+        return self.parent.title
+
+    @property
+    def subtask_titles(self) -> str:
+        """Return child task titles as a readable string."""
+        children = self.subtasks.all()
+        if not children:
+            return ""
+        return " | ".join(child.title for child in children)

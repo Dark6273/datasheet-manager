@@ -9,9 +9,18 @@ from .forms import TodoItemForm
 from .models import TodoItem
 
 
+def _todo_queryset():
+    """Return optimized queryset for todo board rendering."""
+    return (
+        TodoItem.objects.select_related("project", "parent")
+        .prefetch_related("subtasks")
+        .all()
+    )
+
+
 def _render_board(request: HttpRequest, queryset=None) -> HttpResponse:
     """Render the todo board fragment."""
-    items = queryset or TodoItem.objects.all()
+    items = queryset or _todo_queryset()
     context = {
         "todo_items": [item for item in items if item.status == TodoItem.Status.TODO],
         "doing_items": [item for item in items if item.status == TodoItem.Status.DOING],
@@ -28,7 +37,7 @@ def todo_list(request: HttpRequest) -> HttpResponse:
             form.save()
             if request.headers.get("HX-Request") == "true":
                 query = request.GET.get("q", "").strip()
-                items = TodoItem.objects.all()
+                items = _todo_queryset()
                 if query:
                     items = items.filter(
                         Q(title__icontains=query)
@@ -41,7 +50,7 @@ def todo_list(request: HttpRequest) -> HttpResponse:
         form = TodoItemForm()
 
     query = request.GET.get("q", "").strip()
-    items = TodoItem.objects.all()
+    items = _todo_queryset()
     if query:
         items = items.filter(
             Q(title__icontains=query)
@@ -63,7 +72,7 @@ def todo_list(request: HttpRequest) -> HttpResponse:
 def todo_search(request: HttpRequest) -> HttpResponse:
     """Return filtered board results for search."""
     query = request.GET.get("q", "").strip()
-    items = TodoItem.objects.all()
+    items = _todo_queryset()
     if query:
         items = items.filter(
             Q(title__icontains=query)
